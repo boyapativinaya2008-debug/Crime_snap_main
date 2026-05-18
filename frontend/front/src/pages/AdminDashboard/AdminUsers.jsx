@@ -1,0 +1,232 @@
+import axios from "axios";
+import { useEffect, useState } from "react";
+import "../../styles/adminreports.css";
+
+export default function AdminUsers() {
+
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // ================= FETCH USERS =================
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+
+    try {
+
+      const token = localStorage.getItem("token");
+
+      const res = await axios.get(
+        "http://localhost:3000/api/admin/users",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      console.log("USERS DATA:", res.data);
+
+      // Handles both:
+      // res.data = []
+      // res.data = { users: [] }
+
+      setUsers(res.data.users || res.data);
+
+    } catch (err) {
+
+      console.log(
+        "FETCH ERROR:",
+        err.response?.data || err
+      );
+
+    } finally {
+
+      setLoading(false);
+    }
+  };
+
+  // ================= BLOCK USER =================
+
+  const blockUser = async (id) => {
+
+    try {
+
+      const token = localStorage.getItem("token");
+
+      await axios.put(
+        `http://localhost:3000/api/admin/block/${id}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      setUsers((prev) =>
+        prev.map((u) =>
+          u._id === id
+            ? { ...u, status: "Blocked" }
+            : u
+        )
+      );
+
+    } catch (err) {
+
+      console.log(
+        "BLOCK ERROR:",
+        err.response?.data || err
+      );
+    }
+  };
+
+  // ================= UNBLOCK USER =================
+
+  const unblockUser = async (id) => {
+
+    try {
+
+      const token = localStorage.getItem("token");
+
+      await axios.put(
+        `http://localhost:3000/api/admin/unblock/${id}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      setUsers((prev) =>
+        prev.map((u) =>
+          u._id === id
+            ? { ...u, status: "Active" }
+            : u
+        )
+      );
+
+    } catch (err) {
+
+      console.log(
+        "UNBLOCK ERROR:",
+        err.response?.data || err
+      );
+    }
+  };
+
+  // ================= LOADING =================
+
+  if (loading) {
+    return <h2>Loading users...</h2>;
+  }
+
+  // ================= UI =================
+
+  return (
+    <div className="admin-page">
+
+      <h1>Admin - Users Management</h1>
+
+      {users.length === 0 ? (
+        <h3>No users found</h3>
+      ) : (
+
+        <table className="admin-table">
+
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            {users.map((user, index) => (
+
+              <tr key={user._id || user.email}>
+
+                <td>{index + 1}</td>
+
+                <td>{user.name}</td>
+
+                <td>{user.email}</td>
+
+                <td>
+                  <span
+                    style={{
+                      color:
+                        (user.status || "Active") === "Blocked"
+                          ? "red"
+                          : "green",
+
+                      fontWeight: "bold",
+                    }}
+                  >
+                    {user.status || "Active"}
+                  </span>
+                </td>
+
+                <td>
+
+                  {(user.status || "Active") === "Blocked" ? (
+
+                    <button
+                      onClick={() =>
+                        unblockUser(user._id)
+                      }
+                      style={{
+                        background: "green",
+                        color: "white",
+                        padding: "6px 12px",
+                        border: "none",
+                        borderRadius: "6px",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Unblock
+                    </button>
+
+                  ) : (
+
+                    <button
+                      onClick={() =>
+                        blockUser(user._id)
+                      }
+                      style={{
+                        background: "red",
+                        color: "white",
+                        padding: "6px 12px",
+                        border: "none",
+                        borderRadius: "6px",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Block
+                    </button>
+
+                  )}
+
+                </td>
+
+              </tr>
+
+            ))}
+
+          </tbody>
+
+        </table>
+
+      )}
+
+    </div>
+  );
+}

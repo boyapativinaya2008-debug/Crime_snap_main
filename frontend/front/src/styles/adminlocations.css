@@ -1,0 +1,220 @@
+/* PAGE */
+
+.admin-page {
+  width: 100%;
+  min-height: 100vh;
+  padding: 30px;
+  background: #f1f5f9;
+  font-family: Arial, sans-serif;
+  box-sizing: border-box;
+}
+
+/* TITLE */
+
+.admin-page h1 {
+  font-size: 32px;
+  color: #1e293b;
+  margin-bottom: 25px;
+}
+
+/* MESSAGE */
+
+.message-box {
+  background: #22c55e;
+  color: white;
+  padding: 12px 18px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  width: fit-content;
+  font-weight: 600;
+}
+
+/* FORM */
+
+.add-location-form {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow:
+    0 2px 10px
+    rgba(0,0,0,0.08);
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      auto-fit,
+      minmax(220px, 1fr)
+    );
+
+  gap: 15px;
+
+  margin-bottom: 30px;
+}
+
+/* INPUTS */
+
+.add-location-form input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+  transition: 0.3s ease;
+  box-sizing: border-box;
+}
+
+.add-location-form input:focus {
+  border-color: #2563eb;
+  box-shadow:
+    0 0 5px
+    rgba(37,99,235,0.3);
+}
+
+/* BUTTONS */
+
+.add-btn,
+.cancel-btn,
+.edit-btn,
+.delete-btn {
+  border: none;
+  padding: 11px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: 0.3s ease;
+}
+
+/* ADD BUTTON */
+
+.add-btn {
+  background: #2563eb;
+  color: white;
+}
+
+.add-btn:hover {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+/* CANCEL BUTTON */
+
+.cancel-btn {
+  background: #64748b;
+  color: white;
+}
+
+.cancel-btn:hover {
+  background: #475569;
+  transform: translateY(-1px);
+}
+
+/* EDIT BUTTON */
+
+.edit-btn {
+  background: #f59e0b;
+  color: white;
+}
+
+.edit-btn:hover {
+  background: #d97706;
+}
+
+/* DELETE BUTTON */
+
+.delete-btn {
+  background: #ef4444;
+  color: white;
+  margin-left: 10px;
+}
+
+.delete-btn:hover {
+  background: #dc2626;
+}
+
+/* TABLE */
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+
+  box-shadow:
+    0 2px 10px
+    rgba(0,0,0,0.08);
+}
+
+/* TABLE HEAD */
+
+.admin-table thead {
+  background: #1e293b;
+  color: white;
+}
+
+.admin-table th {
+  padding: 16px;
+  text-align: left;
+  font-size: 15px;
+}
+
+/* TABLE BODY */
+
+.admin-table td {
+  padding: 15px;
+  border-bottom: 1px solid #e2e8f0;
+  color: #334155;
+  font-size: 14px;
+}
+
+/* ROW HOVER */
+
+.admin-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+/* NO DATA */
+
+.admin-table td[colspan] {
+  padding: 25px;
+  text-align: center;
+  font-weight: 600;
+  color: #64748b;
+}
+
+/* RESPONSIVE */
+
+@media screen and (max-width: 768px) {
+
+  .admin-page {
+    padding: 15px;
+  }
+
+  .admin-page h1 {
+    font-size: 24px;
+  }
+
+  .add-location-form {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-table {
+    display: block;
+    overflow-x: auto;
+  }
+
+  .edit-btn,
+  .delete-btn,
+  .add-btn,
+  .cancel-btn {
+    width: 100%;
+    margin: 5px 0;
+  }
+
+  .delete-btn {
+    margin-left: 0;
+  }
+}
