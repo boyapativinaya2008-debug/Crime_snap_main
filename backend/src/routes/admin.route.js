@@ -1,53 +1,61 @@
-const router = require("express").Router();
+const express = require("express");
+const router = express.Router();
 
+/* ================= CONTROLLERS ================= */
 const {
   adminLogin,
   getAllUsers,
   deleteUser,
   blockUser,
   unblockUser,
-  updateComplaintStatus,
-  assignOfficer,
   getAllOfficers,
   addOfficer,
   deleteOfficer,
   getLocations,
   addLocation,
+  updateComplaintStatus,
+  assignOfficer,
 } = require("../controllers/admin.controller");
 
 const {
   getAllComplaints,
 } = require("../controllers/complaint.controller");
 
+/* ================= MIDDLEWARE ================= */
 const {
   protect,
   adminOnly,
 } = require("../middleware/auth.middleware");
 
-/* AUTH */
+/* ================= LOGIN ================= */
 router.post("/login", adminLogin);
 
-/* USERS */
-router.get("/users", protect, adminOnly, getAllUsers);
-router.delete("/user/:id", protect, adminOnly, deleteUser);
-router.put("/block/:id", protect, adminOnly, blockUser);
-router.put("/unblock/:id", protect, adminOnly, unblockUser);
+/* ================= USERS ================= */
+router.get("/users", getAllUsers);
 
-/* COMPLAINTS */
+router.delete("/users/:id", protect, adminOnly, deleteUser);
+
+router.put("/users/block/:id", protect, adminOnly, blockUser);
+
+router.put("/users/unblock/:id", protect, adminOnly, unblockUser);
+
+/* ================= COMPLAINTS ================= */
 router.get("/complaints", protect, adminOnly, getAllComplaints);
 
 router.put("/update-status/:id", protect, adminOnly, updateComplaintStatus);
 
-/* ✅ FIXED ROUTE (IMPORTANT) */
 router.put("/assign-officer/:id", protect, adminOnly, assignOfficer);
 
-/* OFFICERS */
+/* ================= OFFICERS ================= */
 router.get("/officers", protect, adminOnly, getAllOfficers);
+
 router.post("/officers", protect, adminOnly, addOfficer);
+
 router.delete("/officers/:id", protect, adminOnly, deleteOfficer);
 
-/* LOCATIONS */
+/* ================= LOCATIONS ================= */
 router.get("/locations", protect, adminOnly, getLocations);
+
 router.post("/locations", protect, adminOnly, addLocation);
 
 module.exports = router;
