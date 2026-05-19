@@ -53,8 +53,7 @@ export default function Home() {
 
           <Link to="/register">🤝 Join</Link>
 
-          {/* 👮 OFFICER LINK ADDED */}
-          <Link to="/officer/login">👮 Officer</Link>
+        
 
           {/* 🛠 ADMIN */}
           <Link to="/admin/login" className="admin-btn">
@@ -82,10 +81,7 @@ export default function Home() {
               🔐 Login
             </Link>
 
-            {/* 👮 OFFICER BUTTON */}
-            <Link to="/officer/login" className="btn outline">
-              👮 Officer Login
-            </Link>
+            
           </div>
         </div>
       </section>
