@@ -80,3 +80,57 @@
   font-size: 14px;
   text-align: center;
 }
+/* FORM CARD */
+.report-card {
+  width: 420px;
+  max-width: 95%;
+  padding: 25px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+}
+
+/* IMAGE WRAPPER (KEY FIX) */
+.preview-wrapper {
+  margin-top: 12px;
+  display: flex;
+  justify-content: center;
+}
+
+/* IMAGE CONTROL (THIS FIXES YOUR ISSUE) */
+.image-preview {
+  width: 100%;
+  max-width: 250px;   /* 👈 prevents big image */
+  max-height: 180px;  /* 👈 prevents tall image */
+  object-fit: cover;
+  border-radius: 10px;
+  border: 2px solid #ddd;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+/* UPLOAD BUTTON */
+.upload-btn {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 10px 14px;
+  background: #222;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* SUBMIT BUTTON */
+.submit-btn {
+  width: 100%;
+  margin-top: 15px;
+  padding: 12px;
+  background: #ff4d4f;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

@@ -4,7 +4,6 @@ import API from "../../api/api";
 
 import "../../styles/report.css";
 import bg from "../../assets/auth-bg.jpeg";
-import "../../styles/dashboard.css";
 
 export default function ReportComplaint() {
   const navigate = useNavigate();
@@ -28,22 +27,25 @@ export default function ReportComplaint() {
   }, [preview]);
 
   const handleChange = (e) => {
-    setForm({
-      ...form,
+    setForm((prev) => ({
+      ...prev,
       [e.target.name]: e.target.value
-    });
+    }));
   };
 
   const handleImage = (e) => {
     const file = e.target.files[0];
-    if (file) {
-      setForm({ ...form, image: file });
-      setPreview(URL.createObjectURL(file));
-    }
+    if (!file) return;
+
+    if (preview) URL.revokeObjectURL(preview);
+
+    setForm((prev) => ({ ...prev, image: file }));
+    setPreview(URL.createObjectURL(file));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (loading) return;
 
     try {
       setLoading(true);
@@ -68,14 +70,11 @@ export default function ReportComplaint() {
       formData.append("category", form.category);
       formData.append("location", form.location);
       formData.append("description", form.description);
-
-      // IMPORTANT: must match backend multer field name
       formData.append("evidence", form.image);
 
       await API.post("/complaints", formData, {
         headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data"
+          Authorization: `Bearer ${token}`
         }
       });
 
@@ -89,10 +88,7 @@ export default function ReportComplaint() {
     } catch (err) {
       console.error(err);
       setLoading(false);
-      setMessage(
-        err.response?.data?.msg ||
-        "❌ Failed to submit complaint"
-      );
+      setMessage(err.response?.data?.msg || "❌ Failed to submit complaint");
     }
   };
 
@@ -125,12 +121,8 @@ export default function ReportComplaint() {
             <option value="">Select Category</option>
             <option value="Theft & Robbery">Theft & Robbery</option>
             <option value="Harassment & Bullying">Harassment & Bullying</option>
-            <option value="Domestic Violence">Domestic Violence</option>
             <option value="Cybercrime">Cybercrime</option>
-            <option value="Women & Child Safety Crime">Women & Child Safety Crime</option>
-            <option value="Financial Fraud & Scams">Financial Fraud & Scams</option>
-            <option value="Physical Violence">Physical Violence</option>
-            <option value="Drug Crime">Drug Crime</option>
+            <option value="Domestic Violence">Domestic Violence</option>
             <option value="Traffic Violations">Traffic Violations</option>
           </select>
 
@@ -161,12 +153,11 @@ export default function ReportComplaint() {
             />
           </label>
 
+          {/* FIXED IMAGE PREVIEW */}
           {preview && (
-            <img
-              src={preview}
-              alt="preview"
-              className="image-preview-box"
-            />
+            <div className="preview-wrapper">
+              <img src={preview} alt="preview" className="image-preview" />
+            </div>
           )}
 
           <button type="submit" className="submit-btn" disabled={loading}>
