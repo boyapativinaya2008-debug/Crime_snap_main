@@ -5,6 +5,7 @@ import "../../styles/adminreports.css";
 export default function AdminUsers() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  console.log("API URL:", process.env.REACT_APP_API_URL);
 
   // ================= FETCH USERS =================
   useEffect(() => {
