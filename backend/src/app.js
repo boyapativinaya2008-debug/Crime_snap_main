@@ -6,7 +6,7 @@ const app = express();
 /* ================= MIDDLEWARE ================= */
 app.use(cors({
   origin: [
-    "https://crimesnap2026.netlify.app",
+    "https://crimesnap2k26.netlify.app",
   ],
   credentials: true
 }));
