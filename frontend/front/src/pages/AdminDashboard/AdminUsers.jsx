@@ -3,24 +3,26 @@ import { useEffect, useState } from "react";
 import "../../styles/adminreports.css";
 
 export default function AdminUsers() {
-
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // ================= FETCH USERS =================
-
   useEffect(() => {
     fetchUsers();
   }, []);
 
   const fetchUsers = async () => {
-
     try {
-
       const token = localStorage.getItem("token");
 
+      if (!token) {
+        console.log("No token found");
+        setLoading(false);
+        return;
+      }
+
       const res = await axios.get(
-        "http://localhost:3000/api/admin/users",
+        `${process.env.REACT_APP_API_URL}/api/admin/users`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -28,37 +30,33 @@ export default function AdminUsers() {
         }
       );
 
-      console.log("USERS DATA:", res.data);
+      console.log("USERS RESPONSE:", res.data);
 
-      // Handles both:
-      // res.data = []
-      // res.data = { users: [] }
+      // ✅ SAFE RESPONSE HANDLING
+      const data = res.data;
 
-      setUsers(res.data.users || res.data);
-
+      if (Array.isArray(data)) {
+        setUsers(data);
+      } else if (Array.isArray(data?.users)) {
+        setUsers(data.users);
+      } else {
+        setUsers([]);
+      }
     } catch (err) {
-
-      console.log(
-        "FETCH ERROR:",
-        err.response?.data || err
-      );
-
+      console.log("FETCH ERROR:", err.response?.data || err);
+      setUsers([]);
     } finally {
-
       setLoading(false);
     }
   };
 
   // ================= BLOCK USER =================
-
   const blockUser = async (id) => {
-
     try {
-
       const token = localStorage.getItem("token");
 
       await axios.put(
-        `http://localhost:3000/api/admin/block/${id}`,
+        `${process.env.REACT_APP_API_URL}/api/admin/block/${id}`,
         {},
         {
           headers: {
@@ -69,31 +67,21 @@ export default function AdminUsers() {
 
       setUsers((prev) =>
         prev.map((u) =>
-          u._id === id
-            ? { ...u, status: "Blocked" }
-            : u
+          u._id === id ? { ...u, status: "Blocked" } : u
         )
       );
-
     } catch (err) {
-
-      console.log(
-        "BLOCK ERROR:",
-        err.response?.data || err
-      );
+      console.log("BLOCK ERROR:", err.response?.data || err);
     }
   };
 
   // ================= UNBLOCK USER =================
-
   const unblockUser = async (id) => {
-
     try {
-
       const token = localStorage.getItem("token");
 
       await axios.put(
-        `http://localhost:3000/api/admin/unblock/${id}`,
+        `${process.env.REACT_APP_API_URL}/api/admin/unblock/${id}`,
         {},
         {
           headers: {
@@ -104,40 +92,28 @@ export default function AdminUsers() {
 
       setUsers((prev) =>
         prev.map((u) =>
-          u._id === id
-            ? { ...u, status: "Active" }
-            : u
+          u._id === id ? { ...u, status: "Active" } : u
         )
       );
-
     } catch (err) {
-
-      console.log(
-        "UNBLOCK ERROR:",
-        err.response?.data || err
-      );
+      console.log("UNBLOCK ERROR:", err.response?.data || err);
     }
   };
 
   // ================= LOADING =================
-
   if (loading) {
     return <h2>Loading users...</h2>;
   }
 
   // ================= UI =================
-
   return (
     <div className="admin-page">
-
       <h1>Admin - Users Management</h1>
 
       {users.length === 0 ? (
         <h3>No users found</h3>
       ) : (
-
         <table className="admin-table">
-
           <thead>
             <tr>
               <th>ID</th>
@@ -149,15 +125,10 @@ export default function AdminUsers() {
           </thead>
 
           <tbody>
-
             {users.map((user, index) => (
-
-              <tr key={user._id || user.email}>
-
+              <tr key={user._id || index}>
                 <td>{index + 1}</td>
-
                 <td>{user.name}</td>
-
                 <td>{user.email}</td>
 
                 <td>
@@ -167,7 +138,6 @@ export default function AdminUsers() {
                         (user.status || "Active") === "Blocked"
                           ? "red"
                           : "green",
-
                       fontWeight: "bold",
                     }}
                   >
@@ -176,13 +146,9 @@ export default function AdminUsers() {
                 </td>
 
                 <td>
-
                   {(user.status || "Active") === "Blocked" ? (
-
                     <button
-                      onClick={() =>
-                        unblockUser(user._id)
-                      }
+                      onClick={() => unblockUser(user._id)}
                       style={{
                         background: "green",
                         color: "white",
@@ -194,13 +160,9 @@ export default function AdminUsers() {
                     >
                       Unblock
                     </button>
-
                   ) : (
-
                     <button
-                      onClick={() =>
-                        blockUser(user._id)
-                      }
+                      onClick={() => blockUser(user._id)}
                       style={{
                         background: "red",
                         color: "white",
@@ -212,21 +174,13 @@ export default function AdminUsers() {
                     >
                       Block
                     </button>
-
                   )}
-
                 </td>
-
               </tr>
-
             ))}
-
           </tbody>
-
         </table>
-
       )}
-
     </div>
   );
 }
