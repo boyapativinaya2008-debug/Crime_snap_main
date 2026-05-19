@@ -31,7 +31,7 @@ const {
 router.post("/login", adminLogin);
 
 /* ================= USERS ================= */
-router.get("/users", getAllUsers);
+router.get("/users", protect, adminOnly, getAllUsers);
 
 router.delete("/users/:id", protect, adminOnly, deleteUser);
 
