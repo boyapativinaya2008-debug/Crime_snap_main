@@ -57,7 +57,7 @@ export default function AdminUsers() {
       const token = localStorage.getItem("token");
 
       await axios.put(
-        `${BASE_URL}/api/admin/block/${id}`,
+        `${BASE_URL}/api/admin/users/block/${id}`,
         {},
         {
           headers: {
@@ -82,7 +82,7 @@ export default function AdminUsers() {
       const token = localStorage.getItem("token");
 
       await axios.put(
-        `${BASE_URL}/api/admin/unblock/${id}`,
+        `${BASE_URL}/api/admin/users/unblock/${id}`,
         {},
         {
           headers: {
