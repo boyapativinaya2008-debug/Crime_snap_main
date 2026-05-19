@@ -2,10 +2,11 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import "../../styles/adminreports.css";
 
+const BASE_URL = "https://crime-snap-main-1.onrender.com";
+
 export default function AdminUsers() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  console.log("API URL:", process.env.REACT_APP_API_URL);
 
   // ================= FETCH USERS =================
   useEffect(() => {
@@ -23,7 +24,7 @@ export default function AdminUsers() {
       }
 
       const res = await axios.get(
-        `${process.env.REACT_APP_API_URL}/api/admin/users`,
+        `${BASE_URL}/api/admin/users`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -33,7 +34,6 @@ export default function AdminUsers() {
 
       console.log("USERS RESPONSE:", res.data);
 
-      // ✅ SAFE RESPONSE HANDLING
       const data = res.data;
 
       if (Array.isArray(data)) {
@@ -57,7 +57,7 @@ export default function AdminUsers() {
       const token = localStorage.getItem("token");
 
       await axios.put(
-        `${process.env.REACT_APP_API_URL}/api/admin/block/${id}`,
+        `${BASE_URL}/api/admin/block/${id}`,
         {},
         {
           headers: {
@@ -82,7 +82,7 @@ export default function AdminUsers() {
       const token = localStorage.getItem("token");
 
       await axios.put(
-        `${process.env.REACT_APP_API_URL}/api/admin/unblock/${id}`,
+        `${BASE_URL}/api/admin/unblock/${id}`,
         {},
         {
           headers: {
@@ -101,12 +101,10 @@ export default function AdminUsers() {
     }
   };
 
-  // ================= LOADING =================
   if (loading) {
     return <h2>Loading users...</h2>;
   }
 
-  // ================= UI =================
   return (
     <div className="admin-page">
       <h1>Admin - Users Management</h1>
