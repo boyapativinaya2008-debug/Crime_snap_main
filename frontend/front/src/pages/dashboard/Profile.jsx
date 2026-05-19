@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import API from "../../api/api";
 
 import "../../styles/profile.css";
 
@@ -22,35 +22,29 @@ export default function Profile() {
         if (!token) return;
 
         // USER API
-        const userRes = await axios.get(
-          "http://localhost:3000/api/auth/me",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const userRes = await API.get("/auth/me", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
         setUser(userRes.data);
 
         // COMPLAINTS API
-        const compRes = await axios.get(
-          "http://localhost:3000/api/complaints/my",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const compRes = await API.get("/complaints/my", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
         console.log("COMPLAINTS:", compRes.data);
 
-        // ✅ FIXED FOR ARRAY RESPONSE
         setComplaintsCount(
           Array.isArray(compRes.data) ? compRes.data.length : 0
         );
+
       } catch (err) {
-        console.log("PROFILE ERROR:", err);
+        console.log("PROFILE ERROR:", err.response?.data || err);
       }
     };
 
@@ -68,7 +62,6 @@ export default function Profile() {
         <div className="avatar">👤</div>
 
         <h1>{user.name}</h1>
-
         <p className="email">{user.email}</p>
 
         <div className="info">
@@ -88,10 +81,7 @@ export default function Profile() {
           </div>
         </div>
 
-        <button
-          className="profile-btn logout-btn"
-          onClick={handleLogout}
-        >
+        <button className="profile-btn logout-btn" onClick={handleLogout}>
           🚪 Logout
         </button>
       </div>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import API from "../../api/api";
 
 import "../../styles/report.css";
 import bg from "../../assets/auth-bg.jpeg";
@@ -21,7 +21,6 @@ export default function ReportComplaint() {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Clean up the preview URL to avoid memory leaks
   useEffect(() => {
     return () => {
       if (preview) URL.revokeObjectURL(preview);
@@ -69,20 +68,16 @@ export default function ReportComplaint() {
       formData.append("category", form.category);
       formData.append("location", form.location);
       formData.append("description", form.description);
-      
-      // FIXED: Name must match upload.single("image") in server.js
-      formData.append("evidence", form.image); 
 
-      await axios.post(
-        "http://localhost:3000/api/complaints", // Ensure no trailing slash
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data"
-          }
+      // IMPORTANT: must match backend multer field name
+      formData.append("evidence", form.image);
+
+      await API.post("/complaints", formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data"
         }
-      );
+      });
 
       setLoading(false);
       setMessage("✅ Complaint submitted successfully!");
@@ -94,7 +89,10 @@ export default function ReportComplaint() {
     } catch (err) {
       console.error(err);
       setLoading(false);
-      setMessage(err.response?.data?.msg || "❌ Failed to submit complaint");
+      setMessage(
+        err.response?.data?.msg ||
+        "❌ Failed to submit complaint"
+      );
     }
   };
 
@@ -129,7 +127,7 @@ export default function ReportComplaint() {
             <option value="Harassment & Bullying">Harassment & Bullying</option>
             <option value="Domestic Violence">Domestic Violence</option>
             <option value="Cybercrime">Cybercrime</option>
-            <option value="Women&childsafety crime">Women & Child Safety Crime</option>
+            <option value="Women & Child Safety Crime">Women & Child Safety Crime</option>
             <option value="Financial Fraud & Scams">Financial Fraud & Scams</option>
             <option value="Physical Violence">Physical Violence</option>
             <option value="Drug Crime">Drug Crime</option>
@@ -168,13 +166,6 @@ export default function ReportComplaint() {
               src={preview}
               alt="preview"
               className="image-preview-box"
-              style={{
-                width: "100%",
-                marginTop: "10px",
-                borderRadius: "10px",
-                maxHeight: "200px",
-                objectFit: "cover"
-              }}
             />
           )}
 

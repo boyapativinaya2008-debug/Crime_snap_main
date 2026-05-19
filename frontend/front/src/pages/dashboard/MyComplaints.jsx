@@ -17,8 +17,14 @@ export default function MyComplaints() {
     try {
       const token = localStorage.getItem("token");
 
+      if (!token) {
+        setComplaints([]);
+        setLoading(false);
+        return;
+      }
+
       const res = await axios.get(
-        "http://localhost:3000/api/complaints/my",
+        "https://crime-snap-main-1.onrender.com/api/complaints/my",
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -26,20 +32,21 @@ export default function MyComplaints() {
         }
       );
 
-      setComplaints(res.data || []);
+      setComplaints(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
-      console.log("FETCH ERROR:", err);
+      console.log("FETCH ERROR:", err.response?.data || err);
     } finally {
       setLoading(false);
     }
   }, []);
 
+  /* ================= INIT + SOCKET ================= */
   useEffect(() => {
     fetchComplaints();
 
-    /* ================= SOCKET EVENTS ================= */
-
-    const onUpdate = () => fetchComplaints();
+    const onUpdate = () => {
+      fetchComplaints();
+    };
 
     socket.on("status-updated", onUpdate);
     socket.on("complaint-assigned", onUpdate);
@@ -52,6 +59,7 @@ export default function MyComplaints() {
     };
   }, [fetchComplaints]);
 
+  /* ================= DETAILS ================= */
   const openDetails = (item) => {
     navigate("/complaint-details", { state: item });
   };
@@ -90,7 +98,7 @@ export default function MyComplaints() {
             <div
               key={item._id}
               className="list-row clickable"
-
+              onClick={() => openDetails(item)}
             >
               <span>{item.title}</span>
               <span>{item.category}</span>
@@ -108,7 +116,11 @@ export default function MyComplaints() {
                 {item.status}
               </span>
 
-              <span>{item.assignedOfficer || "Not Assigned"}</span>
+              <span>
+                {item.assignedOfficer?.name ||
+                  item.assignedOfficer ||
+                  "Not Assigned"}
+              </span>
             </div>
           ))}
       </div>

@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FaUser, FaEnvelope, FaLock } from "react-icons/fa";
-import axios from "axios";
+
+import API from "../api/api";
 
 import "../styles/register.css";
 import bg from "../assets/auth-bg.jpeg";
@@ -18,7 +19,7 @@ export default function Register() {
   });
 
   const [loading, setLoading] = useState(false);
-  const [error, setError]     = useState("");
+  const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
   const handleChange = (e) => {
@@ -27,20 +28,23 @@ export default function Register() {
   };
 
   const passwordsMatch =
-    form.confirmPassword.length > 0 && form.password === form.confirmPassword;
+    form.confirmPassword.length > 0 &&
+    form.password === form.confirmPassword;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setSuccess("");
 
-    // Frontend validations
+    // validations
     if (!form.name || !form.email || !form.password || !form.confirmPassword) {
       return setError("All fields are required.");
     }
+
     if (form.password.length < 8) {
       return setError("Password must be at least 8 characters.");
     }
+
     if (!passwordsMatch) {
       return setError("Passwords do not match.");
     }
@@ -48,28 +52,33 @@ export default function Register() {
     setLoading(true);
 
     try {
-      const res = await axios.post("http://localhost:3000/api/auth/register", {
-        name:            form.name,
-        email:           form.email,
-        password:        form.password,
+      const res = await API.post("/auth/register", {
+        name: form.name,
+        email: form.email,
+        password: form.password,
         confirmPassword: form.confirmPassword,
-        agree:           true,
-        role:            "user",
+        agree: true,
+        role: "user",
       });
 
       console.log("Register success:", res.data);
-      setSuccess("✅ Account created! Redirecting to login...");
-      setForm({ name: "", email: "", password: "", confirmPassword: "" });
+
+      setSuccess("Account created successfully! Redirecting...");
+      setForm({
+        name: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+      });
 
       setTimeout(() => navigate("/login"), 2000);
-
     } catch (err) {
-      console.error("Register error:", err.response?.data);
+      console.log(err);
+
       setError(
         err.response?.data?.msg ||
-        err.response?.data?.message ||
-        err.response?.data?.error ||
-        "Registration failed. Please try again."
+          err.response?.data?.message ||
+          "Registration failed. Please try again."
       );
     } finally {
       setLoading(false);
@@ -78,7 +87,10 @@ export default function Register() {
 
   return (
     <div className="auth-container">
-      <div className="auth-bg" style={{ backgroundImage: `url(${bg})` }}></div>
+      <div
+        className="auth-bg"
+        style={{ backgroundImage: `url(${bg})` }}
+      ></div>
 
       <div className="page-logo">
         <img src={logo} alt="logo" />
@@ -89,23 +101,21 @@ export default function Register() {
         <div className="quote-box">
           <h1>Join CrimeSnap</h1>
           <h1>Be the change your city needs</h1>
-          <p><i>"Create your account and help build better communities"</i></p>
+          <p>
+            <i>"Create your account and help build better communities"</i>
+          </p>
         </div>
       </div>
 
       {/* RIGHT */}
       <div className="auth-right">
         <div className="auth-box">
-          <h2>🤝 Become a Member</h2>
+          <h2>Become a Member</h2>
 
-          {/* ERROR */}
           {error && <p className="auth-error-msg">{error}</p>}
-
-          {/* SUCCESS */}
           {success && <p className="auth-success-msg">{success}</p>}
 
           <form onSubmit={handleSubmit}>
-
             <div className="input-group">
               <FaUser className="input-icon" />
               <input
@@ -114,7 +124,6 @@ export default function Register() {
                 placeholder="Full Name"
                 value={form.name}
                 onChange={handleChange}
-                required
               />
             </div>
 
@@ -126,7 +135,6 @@ export default function Register() {
                 placeholder="Email Address"
                 value={form.email}
                 onChange={handleChange}
-                required
               />
             </div>
 
@@ -135,10 +143,9 @@ export default function Register() {
               <input
                 type="password"
                 name="password"
-                placeholder="Password (Min. 8 chars)"
+                placeholder="Password (Min 8 chars)"
                 value={form.password}
                 onChange={handleChange}
-                required
               />
             </div>
 
@@ -150,23 +157,23 @@ export default function Register() {
                 placeholder="Confirm Password"
                 value={form.confirmPassword}
                 onChange={handleChange}
-                required
               />
             </div>
 
-            {/* PASSWORD MATCH HINT */}
             {form.confirmPassword.length > 0 && (
-              <p className={`password-hint ${passwordsMatch ? "match" : "no-match"}`}>
-                {passwordsMatch ? "Passwords match ✔" : "Passwords do not match ❌"}
+              <p className={passwordsMatch ? "match" : "no-match"}>
+                {passwordsMatch
+                  ? "Passwords match ✔"
+                  : "Passwords do not match ❌"}
               </p>
             )}
 
             <button
               type="submit"
               className="auth-btn"
-              disabled={!passwordsMatch || loading || form.password.length < 8}
+              disabled={loading || !passwordsMatch}
             >
-              {loading ? "Processing..." : "Register"}
+              {loading ? "Creating..." : "Register"}
             </button>
           </form>
 

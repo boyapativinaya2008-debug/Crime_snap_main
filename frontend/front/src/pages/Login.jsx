@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FaEnvelope, FaLock, FaUser, FaUserShield } from "react-icons/fa";
-import axios from "axios";
+
+import API from "../api/api";
 
 import "../styles/auth.css";
 import bg from "../assets/auth-bg.jpeg";
@@ -10,8 +11,12 @@ import logo from "../assets/logo.png";
 export default function Login() {
   const navigate = useNavigate();
 
-  const [form, setForm] = useState({ email: "", password: "" });
-  const [role, setRole] = useState("user"); // "user" | "admin"
+  const [form, setForm] = useState({
+    email: "",
+    password: "",
+  });
+
+  const [role, setRole] = useState("user");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -21,44 +26,42 @@ export default function Login() {
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  setError("");
-  setLoading(true);
+    e.preventDefault();
+    setError("");
+    setLoading(true);
 
-  try {
-    const res = await axios.post(
-      "http://localhost:3000/api/auth/login",
-      {
+    try {
+      const res = await API.post("/auth/login", {
         ...form,
         role,
+      });
+
+      // save token + user
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("user", JSON.stringify(res.data.user));
+
+      // redirect based on role
+      if (res.data.user.role === "admin") {
+        navigate("/admin/dashboard");
+      } else {
+        navigate("/dashboard");
       }
-    );
+    } catch (err) {
+      console.error("Login Error:", err);
 
-    // Save token + user
-    localStorage.setItem("token", res.data.token);
-    localStorage.setItem("user", JSON.stringify(res.data.user));
-
-    // Redirect
-    if (res.data.user.role === "admin") {
-      navigate("/admin/dashboard");
-    } else {
-      navigate("/dashboard");
+      setError(
+        err.response?.data?.msg ||
+          err.response?.data?.message ||
+          "Login failed. Please check your credentials."
+      );
+    } finally {
+      setLoading(false);
     }
-  } catch (err) {
-    console.error("Login Error:", err);
+  };
 
-    setError(
-      err.response?.data?.msg ||
-      err.response?.data?.message ||
-      err.response?.data?.error ||
-      "Login failed. Please check your credentials."
-    );
-  } finally {
-    setLoading(false);
-  }
-};
   return (
     <div className="auth-container">
+
       {/* BACKGROUND */}
       <div className="auth-bg" style={{ backgroundImage: `url(${bg})` }}></div>
 
@@ -67,48 +70,48 @@ export default function Login() {
         <img src={logo} alt="logo" />
       </div>
 
-      {/* LEFT SIDE */}
+      {/* LEFT */}
       <div className="auth-left">
         <div className="quote-box">
           <h1>Welcome Back 👋</h1>
           <p>
-            "Your voice has the power to improve streets, solve issues, and
-            strengthen communities. CivicSnap helps citizens and authorities
-            work together for a better tomorrow"
+            Your voice can improve your city. Login to continue reporting issues.
           </p>
         </div>
       </div>
 
-      {/* RIGHT SIDE */}
+      {/* RIGHT */}
       <div className="auth-right">
         <div className="auth-box">
 
           {/* ROLE TOGGLE */}
           <div className="role-toggle">
+
             <button
               type="button"
-              className={`role-btn ${role === "user" ? "active" : ""}`}
-              onClick={() => { setRole("user"); setError(""); }}
+              className={role === "user" ? "role-btn active" : "role-btn"}
+              onClick={() => setRole("user")}
             >
-              <FaUser className="role-icon" /> User
+              <FaUser /> User
             </button>
+
             <button
               type="button"
-              className={`role-btn ${role === "admin" ? "active" : ""}`}
-              onClick={() => { setRole("admin"); setError(""); }}
+              className={role === "admin" ? "role-btn active" : "role-btn"}
+              onClick={() => setRole("admin")}
             >
-              <FaUserShield className="role-icon" /> Admin
+              <FaUserShield /> Admin
             </button>
+
           </div>
 
-          <h2>{role === "admin" ? "🛡️ Admin Login" : "👤 User Login"}</h2>
+          <h2>{role === "admin" ? "Admin Login" : "User Login"}</h2>
 
           {/* ERROR */}
-          {error && (
-            <p className="auth-error-msg">{error}</p>
-          )}
+          {error && <p className="auth-error-msg">{error}</p>}
 
           <form onSubmit={handleSubmit}>
+
             {/* EMAIL */}
             <div className="input-group">
               <FaEnvelope className="input-icon" />
@@ -137,8 +140,9 @@ export default function Login() {
 
             {/* BUTTON */}
             <button className="auth-btn" type="submit" disabled={loading}>
-              {loading ? "Logging in..." : `Login as ${role === "admin" ? "Admin" : "User"}`}
+              {loading ? "Logging in..." : `Login as ${role}`}
             </button>
+
           </form>
 
           {/* LINKS */}
@@ -147,9 +151,10 @@ export default function Login() {
               New user? <Link to="/register">Register</Link>
             </div>
           )}
+
           {role === "admin" && (
             <div className="auth-link">
-              New admin? <Link to="/admin/register">Register here</Link>
+              New admin? <Link to="/admin/register">Register</Link>
             </div>
           )}
 

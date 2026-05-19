@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import axios from "axios";
+import API from "../../api/api";
 import "../../styles/adminReports.css";
 
 export default function AdminReports() {
@@ -7,23 +7,21 @@ export default function AdminReports() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
+  /* ================= FETCH COMPLAINTS ================= */
   useEffect(() => {
     const fetchComplaints = async () => {
       try {
         const token = localStorage.getItem("token");
 
-        const res = await axios.get(
-          "http://localhost:3000/api/admin/complaints",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const res = await API.get("/admin/complaints", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
         setComplaints(res.data);
       } catch (err) {
-        console.log(err);
+        console.log("Error fetching complaints:", err);
       } finally {
         setLoading(false);
       }
@@ -32,7 +30,7 @@ export default function AdminReports() {
     fetchComplaints();
   }, []);
 
-  // 🔥 FILTER LOGIC (SEARCH UPGRADE)
+  /* ================= FILTER LOGIC ================= */
   const filteredComplaints = useMemo(() => {
     return complaints.filter((item) => {
       const query = search.toLowerCase();
@@ -47,7 +45,7 @@ export default function AdminReports() {
     });
   }, [complaints, search]);
 
-  // STATUS CLASS
+  /* ================= STATUS CLASS ================= */
   const getStatusClass = (status) => {
     if (status === "Pending") return "pending";
     if (status === "Resolved") return "resolved";
@@ -56,6 +54,7 @@ export default function AdminReports() {
 
   return (
     <div className="admin-page">
+
       {/* HEADER */}
       <div className="admin-header">
         <div>
@@ -64,11 +63,9 @@ export default function AdminReports() {
             View and manage complaints submitted by users.
           </p>
         </div>
-
-        
       </div>
 
-      {/* DASHBOARD CARDS */}
+      {/* CARDS */}
       <div className="dashboard-cards">
         <div className="dashboard-card">
           <h2>{complaints.length}</h2>
@@ -99,11 +96,11 @@ export default function AdminReports() {
 
       {/* TABLE */}
       <div className="table-wrapper">
+
         {/* TABLE TOP */}
         <div className="table-top">
           <h2>Complaints List</h2>
 
-          {/* 🔥 SEARCH INPUT UPGRADED */}
           <div className="search-box">
             <input
               type="text"
@@ -114,6 +111,7 @@ export default function AdminReports() {
           </div>
         </div>
 
+        {/* LOADING */}
         {loading ? (
           <h2 className="loading-text">Loading complaints...</h2>
         ) : filteredComplaints.length === 0 ? (
@@ -154,11 +152,7 @@ export default function AdminReports() {
                     <td>{item.location}</td>
 
                     <td>
-                      <span
-                        className={`status ${getStatusClass(
-                          item.status
-                        )}`}
-                      >
+                      <span className={`status ${getStatusClass(item.status)}`}>
                         {item.status}
                       </span>
                     </td>
@@ -169,6 +163,7 @@ export default function AdminReports() {
                   </tr>
                 ))}
               </tbody>
+
             </table>
           </div>
         )}

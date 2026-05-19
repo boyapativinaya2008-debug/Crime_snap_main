@@ -3,22 +3,30 @@ const cors = require("cors");
 
 const app = express();
 
-/* MIDDLEWARE */
+/* ================= MIDDLEWARE ================= */
+app.use(cors({
+  origin: "https://crimesnap.netlify.app/",
+  credentials: true
+}));
 
-app.use(cors());
 app.use(express.json());
 
-/* TEST ROUTE */
-
+/* ================= TEST ROUTE ================= */
 app.get("/", (req, res) => {
-  res.send("Backend API Running");
+  res.send("Backend API Running 🚀");
 });
 
-/* ROUTES */
-
+/* ================= ROUTES ================= */
 app.use("/api/auth", require("./routes/auth.route"));
 app.use("/api/admin", require("./routes/admin.route"));
 app.use("/api/complaints", require("./routes/complaint.route"));
 app.use("/api/officers", require("./routes/officers.route"));
+app.use("/api/officer/complaints", require("./routes/officer.complaints.route"));
 app.use("/api/locations", require("./routes/adminLocation"));
+
+/* ================= 404 ================= */
+app.use((req, res) => {
+  res.status(404).json({ msg: "Route not found" });
+});
+
 module.exports = app;
