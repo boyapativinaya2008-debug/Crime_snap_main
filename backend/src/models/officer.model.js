@@ -38,10 +38,6 @@ const officerSchema =
         type: String,
         required: true,
       },
-      role: {
-         type: String,
-         default: "officer",
-      },
 
       status: {
 
