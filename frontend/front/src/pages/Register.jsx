@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { FaUser, FaEnvelope, FaLock } from "react-icons/fa";
 import axios from "axios";
 
-import "../styles/auth.css";
+import "../styles/register.css";
 import bg from "../assets/auth-bg.jpeg";
 import logo from "../assets/logo.png";
 

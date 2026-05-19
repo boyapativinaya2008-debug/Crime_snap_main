@@ -3,14 +3,38 @@ import API from "../../api/api";
 import "../../styles/adminofficers.css";
 
 export default function AdminOfficers() {
+
   const [officers, setOfficers] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchOfficers = async () => {
+  const fetchData = async () => {
     try {
       setLoading(true);
-      const res = await API.get("/admin/officers");
-      setOfficers(res.data);
+
+      const [officersRes, complaintsRes] = await Promise.all([
+        API.get("/admin/officers"),
+        API.get("/admin/complaints"),
+      ]);
+
+      const officersData = officersRes.data;
+      const complaints = complaintsRes.data;
+
+      const updatedOfficers = officersData.map((officer) => {
+
+        // ✅ FIX: compare NAME not ID
+        const activeCases = complaints.filter((complaint) =>
+          complaint.assignedOfficer === officer.name &&
+          complaint.status !== "Resolved"
+        ).length;
+
+        return {
+          ...officer,
+          activeCases,
+        };
+      });
+
+      setOfficers(updatedOfficers);
+
     } catch (err) {
       console.error("Fetch officers error:", err);
     } finally {
@@ -19,7 +43,7 @@ export default function AdminOfficers() {
   };
 
   useEffect(() => {
-    fetchOfficers();
+    fetchData();
   }, []);
 
   const getStatus = (active, max) => {
@@ -46,6 +70,7 @@ export default function AdminOfficers() {
 
   return (
     <div className="admin-page">
+
       <h1>Officer Workload Dashboard</h1>
 
       {loading ? (
@@ -65,35 +90,32 @@ export default function AdminOfficers() {
 
           <tbody>
             {officers.map((officer) => {
+
               const active = officer.activeCases || 0;
               const max = officer.maxCapacity || 5;
-
               const load = `${active} / ${max}`;
               const status = getStatus(active, max);
 
               return (
                 <tr key={officer._id}>
                   <td>{officer.name}</td>
-                  <td>{officer.badgeNumber}</td>
+                  <td>{officer.badgeNo}</td>
                   <td>{officer.rank}</td>
                   <td>{officer.station}</td>
 
-                  <td>
-                    <strong>{load}</strong>
-                  </td>
+                  <td><strong>{load}</strong></td>
 
                   <td>
-                    <span
-                      style={{
-                        padding: "4px 10px",
-                        borderRadius: "6px",
-                        fontWeight: "bold",
-                        ...getStyle(status),
-                      }}
-                    >
+                    <span style={{
+                      padding: "4px 10px",
+                      borderRadius: "6px",
+                      fontWeight: "bold",
+                      ...getStyle(status),
+                    }}>
                       {status}
                     </span>
                   </td>
+
                 </tr>
               );
             })}

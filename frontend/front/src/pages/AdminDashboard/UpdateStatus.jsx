@@ -7,6 +7,8 @@ export default function UpdateStatus() {
   const [officers, setOfficers] = useState([]);
   const [search, setSearch] = useState("");
 
+  /* ================= FETCH ================= */
+
   useEffect(() => {
     fetchComplaints();
     fetchOfficers();
@@ -17,7 +19,7 @@ export default function UpdateStatus() {
       const res = await API.get("/admin/complaints");
       setComplaints(res.data);
     } catch (err) {
-      console.log("Complaint fetch error:", err);
+      console.log("Complaint fetch error:", err.response?.data || err.message);
     }
   };
 
@@ -26,9 +28,11 @@ export default function UpdateStatus() {
       const res = await API.get("/admin/officers");
       setOfficers(res.data);
     } catch (err) {
-      console.log("Officer fetch error:", err);
+      console.log("Officer fetch error:", err.response?.data || err.message);
     }
   };
+
+  /* ================= STATUS UPDATE ================= */
 
   const handleStatusUpdate = async (id, status) => {
     try {
@@ -40,18 +44,22 @@ export default function UpdateStatus() {
         )
       );
     } catch (err) {
-      console.log("Status update error:", err);
+      console.log("Status update error:", err.response?.data || err.message);
     }
   };
 
+  /* ================= OFFICER ASSIGN (FINAL FIX) ================= */
+
   const handleOfficerAssign = async (id, officerId) => {
     try {
+      if (!officerId) return;
+
       const selectedOfficer = officers.find(
         (o) => o._id === officerId
       );
 
-      await API.put(`/admin/assign/${id}`, {
-        assignedOfficer: selectedOfficer.name,
+      await API.put(`/admin/assign-officer/${id}`, {
+        officerId,
       });
 
       setComplaints((prev) =>
@@ -59,16 +67,19 @@ export default function UpdateStatus() {
           item._id === id
             ? {
                 ...item,
-                assignedOfficer: selectedOfficer.name,
-                assignedOfficerId: officerId,
+                assignedOfficer: selectedOfficer?.name,
+                assignedOfficerId: officerId,   // 👈 IMPORTANT
+                status: "In Progress",
               }
             : item
         )
       );
     } catch (err) {
-      console.log("Assign officer error:", err);
+      console.log("Assign officer error:", err.response?.data || err.message);
     }
   };
+
+  /* ================= SEARCH ================= */
 
   const filteredComplaints = complaints.filter((item) => {
     const keyword = search.toLowerCase();
@@ -84,17 +95,16 @@ export default function UpdateStatus() {
   return (
     <div className="update-page">
 
-      {/* HEADER */}
       <div className="update-header">
         <h1>🔄 Update Complaint Status</h1>
-        <p>Manage and update complaint progress.</p>
+        <p>Manage complaints and assign officers.</p>
       </div>
 
       {/* SEARCH */}
       <div style={{ marginBottom: "20px" }}>
         <input
           type="text"
-          placeholder="Search by user, title, category, status..."
+          placeholder="Search complaints..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           style={{
@@ -112,7 +122,7 @@ export default function UpdateStatus() {
         <table className="update-table">
           <thead>
             <tr>
-              <th>ID</th>
+              <th>#</th>
               <th>User</th>
               <th>Category</th>
               <th>Location</th>
@@ -125,16 +135,14 @@ export default function UpdateStatus() {
           <tbody>
             {filteredComplaints.length === 0 ? (
               <tr>
-                <td colSpan="7" style={{ textAlign: "center" }}>
-                  No results found
-                </td>
+                <td colSpan="7">No complaints found</td>
               </tr>
             ) : (
               filteredComplaints.map((item, index) => (
                 <tr key={item._id}>
                   <td>{index + 1}</td>
 
-                  <td>{item.user?.name}</td>
+                  <td>{item.user?.name || "Unknown"}</td>
                   <td>{item.category}</td>
                   <td>{item.location}</td>
 
@@ -144,6 +152,7 @@ export default function UpdateStatus() {
                     </span>
                   </td>
 
+                  {/* STATUS */}
                   <td>
                     <select
                       value={item.status}
@@ -157,7 +166,7 @@ export default function UpdateStatus() {
                     </select>
                   </td>
 
-                  {/* OFFICER DROPDOWN (NO CITY) */}
+                  {/* OFFICER (CLEAN FIX) */}
                   <td>
                     <select
                       value={item.assignedOfficerId || ""}
@@ -169,12 +178,17 @@ export default function UpdateStatus() {
 
                       {officers.map((officer) => (
                         <option key={officer._id} value={officer._id}>
-                          {officer.name} — {officer.station || "No Station"}
+                          {officer.name}
                         </option>
                       ))}
                     </select>
-                  </td>
 
+                    {item.assignedOfficer && (
+                      <div style={{ fontSize: "12px", color: "green" }}>
+                        Assigned: {item.assignedOfficer}
+                      </div>
+                    )}
+                  </td>
                 </tr>
               ))
             )}

@@ -1,206 +1,512 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import api from "../api/api";
-import "../styles/auth.css";
-import "../styles/admin.css";
+
+import {
+  FaUserShield,
+  FaEnvelope,
+  FaLock,
+  FaPhone,
+  FaUser,
+} from "react-icons/fa";
+
+import axios from "axios";
+
+import "../styles/adminregister.css";
+
+import bg from "../assets/auth-bg.jpeg";
 import logo from "../assets/logo.png";
 
 export default function AdminRegister() {
+
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
+
     name: "",
+
     email: "",
+
     phone: "",
+
     password: "",
+
     confirmPassword: "",
+
     adminCode: "",
-    agree: false,
+
   });
 
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [showPass, setShowPass] = useState(false);
+  const [loading, setLoading] =
+    useState(false);
+
+  const [error, setError] =
+    useState("");
+
+  const [success, setSuccess] =
+    useState("");
+
+  /* =========================
+     HANDLE INPUT
+  ========================= */
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
+
     setForm({
+
       ...form,
-      [name]: type === "checkbox" ? checked : value,
+
+      [e.target.name]:
+        e.target.value,
+
     });
+
     setError("");
+
   };
 
-  const pwMatch =
-    form.confirmPassword.length > 0 &&
-    form.password === form.confirmPassword;
+  /* =========================
+     PASSWORD MATCH
+  ========================= */
 
-  const handleSubmit = async (e) => {
+  const passwordsMatch =
+
+    form.confirmPassword
+      .length > 0
+
+    &&
+
+    form.password ===
+      form.confirmPassword;
+
+  /* =========================
+     SUBMIT
+  ========================= */
+
+  const handleSubmit = async (
+    e
+  ) => {
+
     e.preventDefault();
 
+    setError("");
+    setSuccess("");
+
     if (
+
       !form.name ||
+
       !form.email ||
+
       !form.password ||
+
       !form.confirmPassword ||
+
       !form.adminCode
-    )
-      return setError("All required fields must be filled.");
 
-    if (form.password.length < 8)
-      return setError("Password must be at least 8 characters.");
+    ) {
 
-    if (!pwMatch)
-      return setError("Passwords do not match.");
+      return setError(
+        "All fields are required."
+      );
+    }
 
-    if (!form.agree)
-      return setError("You must accept the terms and conditions.");
+    if (
+      form.password.length < 8
+    ) {
+
+      return setError(
+        "Password must be at least 8 characters."
+      );
+    }
+
+    if (!passwordsMatch) {
+
+      return setError(
+        "Passwords do not match."
+      );
+    }
+
+    setLoading(true);
 
     try {
-      setLoading(true);
 
-      await api.post("/auth/register", {
-        ...form,
-        role: "admin",
+      const res =
+        await axios.post(
+
+          "http://localhost:3000/api/auth/register",
+
+          {
+
+            name:
+              form.name,
+
+            email:
+              form.email,
+
+            phone:
+              form.phone,
+
+            password:
+              form.password,
+
+            confirmPassword:
+              form.confirmPassword,
+
+            adminCode:
+              form.adminCode,
+
+            agree: true,
+
+            role: "admin",
+
+          }
+
+        );
+
+      console.log(
+        "Admin register success:",
+        res.data
+      );
+
+      setSuccess(
+        "✅ Admin account created successfully!"
+      );
+
+      setForm({
+
+        name: "",
+
+        email: "",
+
+        phone: "",
+
+        password: "",
+
+        confirmPassword: "",
+
+        adminCode: "",
+
       });
 
-      setSuccess("Admin account created! Redirecting...");
+      setTimeout(() => {
 
-      setTimeout(() => navigate("/admin/login"), 2000);
+        navigate(
+          "/admin/login"
+        );
+
+      }, 2000);
+
     } catch (err) {
-      setError(err.response?.data?.msg || "Registration failed.");
+
+      console.error(
+        "Admin register error:",
+        err.response?.data
+      );
+
+      setError(
+
+        err.response?.data?.msg ||
+
+        err.response?.data?.message ||
+
+        err.response?.data?.error ||
+
+        "Registration failed."
+
+      );
+
     } finally {
+
       setLoading(false);
+
     }
   };
 
   return (
-    <div className="admin-auth-page">
 
-      {/* LEFT PANEL */}
-      <div className="admin-auth-left">
+    <div className="auth-container">
 
-        <div className="admin-brand">
+      {/* BACKGROUND */}
 
-          <div className="admin-logo">
-            <img
-              src={logo}
-              alt="CivicSnap Logo"
-              style={{
-                width: "50px",
-                height: "50px",
-                objectFit: "contain",
-              }}
-            />
-            <span style={{ marginLeft: "10px", fontSize: "20px", fontWeight: "bold" }}>
-              CivicSnap
-            </span>
-          </div>
+      <div
+        className="auth-bg"
+        style={{
+          backgroundImage:
+            `url(${bg})`,
+        }}
+      ></div>
 
-          <p className="admin-brand-sub">Admin Panel</p>
-        </div>
+      {/* LOGO */}
 
-        <div className="admin-auth-hero">
-          <h1>Join the Admin Team</h1>
+      <div className="page-logo">
+
+        <img
+          src={logo}
+          alt="logo"
+        />
+
+      </div>
+
+      {/* LEFT SIDE */}
+
+      <div className="auth-left">
+
+        <div className="quote-box">
+
+          <h1>
+            Admin Registration
+          </h1>
+
+          <h1>
+            Manage CrimeSnap System
+          </h1>
+
           <p>
-            Create your administrator account to manage civic reports, officers,
-            and city services.
-          </p>
-        </div>
 
-        <div className="admin-auth-footer-text">
-          © 2026 CivicSnap
+            <i>
+              "Create an admin
+              account and monitor
+              complaints, officers,
+              reports and real-time
+              civic activities"
+            </i>
+
+          </p>
+
         </div>
 
       </div>
 
-      {/* RIGHT PANEL */}
-      <div className="admin-auth-right">
+      {/* RIGHT SIDE */}
 
-        <div className="admin-auth-card">
+      <div className="auth-right">
 
-          <div className="admin-card-header">
-            <div className="admin-badge">🛡️ Admin Registration</div>
-            <h2>Create admin account</h2>
-          </div>
+        <div className="auth-box">
 
-          {error && <div className="admin-error-box">{error}</div>}
-          {success && <div className="admin-success-box">{success}</div>}
+          <h2>
+            🛡️ Admin Register
+          </h2>
 
-          <form onSubmit={handleSubmit} className="admin-form">
+          {/* ERROR */}
 
-            <input
-              name="name"
-              placeholder="Full Name"
-              value={form.name}
-              onChange={handleChange}
-              required
-            />
+          {error && (
 
-            <input
-              name="email"
-              placeholder="Email"
-              value={form.email}
-              onChange={handleChange}
-              required
-            />
+            <p className="auth-error-msg">
 
-            <input
-              name="phone"
-              placeholder="Phone"
-              value={form.phone}
-              onChange={handleChange}
-            />
+              {error}
 
-            <input
-              type={showPass ? "text" : "password"}
-              name="password"
-              placeholder="Password"
-              value={form.password}
-              onChange={handleChange}
-              required
-            />
+            </p>
 
-            <input
-              type="password"
-              name="confirmPassword"
-              placeholder="Confirm Password"
-              value={form.confirmPassword}
-              onChange={handleChange}
-              required
-            />
+          )}
 
-            <input
-              name="adminCode"
-              placeholder="Admin Code"
-              value={form.adminCode}
-              onChange={handleChange}
-              required
-            />
+          {/* SUCCESS */}
 
-            <label>
+          {success && (
+
+            <p className="auth-success-msg">
+
+              {success}
+
+            </p>
+
+          )}
+
+          {/* FORM */}
+
+          <form
+            onSubmit={
+              handleSubmit
+            }
+          >
+
+            {/* NAME */}
+
+            <div className="input-group">
+
+              <FaUser className="input-icon" />
+
               <input
-                type="checkbox"
-                name="agree"
-                checked={form.agree}
-                onChange={handleChange}
+                type="text"
+                name="name"
+                placeholder="Full Name"
+                value={form.name}
+                onChange={
+                  handleChange
+                }
+                required
               />
-              I agree to terms
-            </label>
 
-            <button type="submit" disabled={loading}>
-              {loading ? "Loading..." : "Create Admin"}
+            </div>
+
+            {/* EMAIL */}
+
+            <div className="input-group">
+
+              <FaEnvelope className="input-icon" />
+
+              <input
+                type="email"
+                name="email"
+                placeholder="Email Address"
+                value={form.email}
+                onChange={
+                  handleChange
+                }
+                required
+              />
+
+            </div>
+
+            {/* PHONE */}
+
+            <div className="input-group">
+
+              <FaPhone className="input-icon" />
+
+              <input
+                type="text"
+                name="phone"
+                placeholder="Phone Number"
+                value={form.phone}
+                onChange={
+                  handleChange
+                }
+              />
+
+            </div>
+
+            {/* PASSWORD */}
+
+            <div className="input-group">
+
+              <FaLock className="input-icon" />
+
+              <input
+                type="password"
+                name="password"
+                placeholder="Password (Min. 8 chars)"
+                value={
+                  form.password
+                }
+                onChange={
+                  handleChange
+                }
+                required
+              />
+
+            </div>
+
+            {/* CONFIRM PASSWORD */}
+
+            <div className="input-group">
+
+              <FaLock className="input-icon" />
+
+              <input
+                type="password"
+                name="confirmPassword"
+                placeholder="Confirm Password"
+                value={
+                  form.confirmPassword
+                }
+                onChange={
+                  handleChange
+                }
+                required
+              />
+
+            </div>
+
+            {/* ADMIN CODE */}
+
+            <div className="input-group">
+
+              <FaUserShield className="input-icon" />
+
+              <input
+                type="text"
+                name="adminCode"
+                placeholder="Admin Security Code"
+                value={
+                  form.adminCode
+                }
+                onChange={
+                  handleChange
+                }
+                required
+              />
+
+            </div>
+
+            {/* PASSWORD MATCH */}
+
+            {form.confirmPassword
+              .length > 0 && (
+
+              <p
+                className={`password-hint ${
+                  passwordsMatch
+                    ? "match"
+                    : "no-match"
+                }`}
+              >
+
+                {passwordsMatch
+
+                  ? "Passwords match ✔"
+
+                  : "Passwords do not match ❌"}
+
+              </p>
+
+            )}
+
+            {/* BUTTON */}
+
+            <button
+              type="submit"
+              className="auth-btn"
+              disabled={
+
+                !passwordsMatch ||
+
+                loading ||
+
+                form.password
+                  .length < 8
+
+              }
+            >
+
+              {loading
+
+                ? "Processing..."
+
+                : "Create Admin"}
+
             </button>
 
           </form>
 
-          <div className="admin-switch-link">
-            Already have an account? <Link to="/admin/login">Login</Link>
+          {/* LOGIN LINK */}
+
+          <div className="auth-link">
+
+            Already have an admin
+            account?{" "}
+
+            <Link to="/admin/login">
+
+              Login
+
+            </Link>
+
           </div>
 
         </div>
+
       </div>
+
     </div>
   );
 }
